@@ -1,0 +1,10 @@
+# Phase 2: Role has deployment permissions
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: platform-deployer-role
+  namespace: cnpe-rbac-test
+rules:
+- apiGroups: ["apps"]
+  resources: ["deployments"]
+  verbs: ["get", "list", "watch", "create", "update", "delete"]

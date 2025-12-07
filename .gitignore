@@ -1,0 +1,14 @@
+# KUTTL generates this when using kindContext
+kubeconfig
+
+# Devbox local environment
+.devbox/
+
+# Editor
+.idea/
+.vscode/
+*.swp
+*~
+
+# OS
+.DS_Store

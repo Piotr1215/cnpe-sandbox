@@ -1,0 +1,10 @@
+# Phase 1: RoleBinding references correct ServiceAccount
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: platform-deployer-binding
+  namespace: cnpe-rbac-test
+subjects:
+- kind: ServiceAccount
+  name: platform-deployer
+  namespace: cnpe-rbac-test

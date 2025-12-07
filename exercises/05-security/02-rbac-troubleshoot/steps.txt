@@ -1,0 +1,2 @@
+0:Check RoleBinding subjects - is it bound to the right ServiceAccount?
+1:Check Role rules - does it include deployments in the apps apiGroup?
