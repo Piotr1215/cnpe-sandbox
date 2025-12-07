@@ -1,0 +1,48 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: cnpe-platform
+---
+# BROKEN CRD - multiple issues to fix
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: environments.platform.cnpe.io
+spec:
+  group: platform.cnpe.io
+  names:
+    kind: Environment
+    listKind: EnvironmentList
+    plural: environments
+    singular: environment
+    shortNames:
+    - env
+  scope: Namespaced
+  versions:
+  - name: v1
+    served: true
+    storage: true
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            # BUG: Missing required fields and validation
+            properties:
+              team:
+                type: string
+              size:
+                type: string
+                # BUG: Missing enum validation for size
+            # BUG: Missing required: [team, size]
+    additionalPrinterColumns:
+    - name: Team
+      type: string
+      jsonPath: .spec.team
+    - name: Size
+      type: string
+      jsonPath: .spec.size
+    - name: Age
+      type: date
+      jsonPath: .metadata.creationTimestamp

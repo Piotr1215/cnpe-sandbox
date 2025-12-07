@@ -1,0 +1,8 @@
+# Step 2: Verify frontend-to-backend policy exists
+apiVersion: kuttl.dev/v1beta1
+kind: TestAssert
+timeout: 60
+commands:
+- script: |
+    # Check policy exists and targets backend pods
+    kubectl get networkpolicy -n tenant-alpha -o yaml | grep -q 'app: backend'

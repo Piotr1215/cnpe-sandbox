@@ -1,0 +1,9 @@
+# Step 3: Verify Environment CR exists with correct values
+apiVersion: platform.cnpe.io/v1
+kind: Environment
+metadata:
+  name: dev-alpha
+  namespace: cnpe-platform
+spec:
+  team: alpha
+  size: medium

@@ -1,0 +1,3 @@
+0:Add required: [team, size] to CRD schema
+1:Add enum: [small, medium, large] to size field
+2:Create Environment CR dev-alpha with team=alpha, size=medium

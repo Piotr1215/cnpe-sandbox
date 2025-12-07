@@ -1,0 +1,3 @@
+0:Create default-deny-ingress NetworkPolicy with empty podSelector
+1:Create allow-frontend-to-backend NetworkPolicy targeting app=backend from app=frontend
+2:Create allow-monitoring NetworkPolicy allowing monitoring namespace on port 9090

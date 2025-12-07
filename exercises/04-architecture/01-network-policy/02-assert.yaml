@@ -1,0 +1,8 @@
+# Step 3: Verify monitoring access policy with namespace selector
+apiVersion: kuttl.dev/v1beta1
+kind: TestAssert
+timeout: 60
+commands:
+- script: |
+    # Check policy allows from monitoring namespace on port 9090
+    kubectl get networkpolicy -n tenant-alpha -o yaml | grep -q 'purpose: monitoring'

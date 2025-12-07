@@ -44,6 +44,15 @@ gitops-tekton: (_run "01-gitops-cd" "03-tekton-trigger")
 # ArgoCD ApplicationSet environment promotion
 gitops-promotion: (_run "01-gitops-cd" "04-environment-promotion")
 
+# ==================== Platform APIs Domain (25%) ====================
+
+# Run all Platform APIs exercises
+domain-platform:
+  cd exercises/02-platform-apis && kubectl kuttl test --config kuttl-test.yaml
+
+# Create platform CRD for self-service
+platform-crd: (_run "02-platform-apis" "01-create-platform-crd")
+
 # ==================== Observability Domain (20%) ====================
 
 # Run all Observability exercises
@@ -58,6 +67,15 @@ obs-grafana: (_run "03-observability" "02-fix-grafana-dashboard")
 
 # Fix Prometheus alerting rule
 obs-alerting: (_run "03-observability" "03-prometheus-alerting")
+
+# ==================== Architecture Domain (15%) ====================
+
+# Run all Architecture exercises
+domain-architecture:
+  cd exercises/04-architecture && kubectl kuttl test --config kuttl-test.yaml
+
+# Configure NetworkPolicy for multi-tenancy
+arch-networkpolicy: (_run "04-architecture" "01-network-policy")
 
 # ==================== Security Domain (15%) ====================
 

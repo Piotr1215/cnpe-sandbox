@@ -1,0 +1,7 @@
+# Step 2: Verify CRD has enum validation for size
+apiVersion: kuttl.dev/v1beta1
+kind: TestAssert
+timeout: 60
+commands:
+- script: |
+    kubectl get crd environments.platform.cnpe.io -o yaml | grep -A10 'size:' | grep -q 'enum'
