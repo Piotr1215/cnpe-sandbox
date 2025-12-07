@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: cnpe-team-alpha
+  # Missing cost allocation labels - user must add them
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cost-test-app
+  namespace: cnpe-team-alpha
+  # Missing cost allocation labels - user must add them
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cost-test
+  template:
+    metadata:
+      labels:
+        app: cost-test
+        # Missing cost allocation labels in pod template
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:alpine
+        resources:
+          requests:
+            cpu: 10m
+            memory: 32Mi
+          limits:
+            cpu: 50m
+            memory: 64Mi

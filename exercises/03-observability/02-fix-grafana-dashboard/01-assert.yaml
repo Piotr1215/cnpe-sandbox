@@ -1,0 +1,7 @@
+# Step 2: Verify dashboard JSON uses correct datasource uid
+apiVersion: kuttl.dev/v1beta1
+kind: TestAssert
+timeout: 60
+commands:
+- script: |
+    kubectl get configmap cnpe-dashboard -n monitoring -o jsonpath='{.data.cnpe-dashboard\.json}' | grep -q '"uid": "prometheus"'

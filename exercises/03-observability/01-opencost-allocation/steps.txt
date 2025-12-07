@@ -1,0 +1,3 @@
+0:Add cost-center, team, environment labels to namespace
+1:Add same labels to deployment metadata
+2:Add labels to pod template for accurate cost attribution

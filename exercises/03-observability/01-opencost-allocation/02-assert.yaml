@@ -1,0 +1,13 @@
+# Step 3: Verify pod template has cost allocation labels for accurate attribution
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cost-test-app
+  namespace: cnpe-team-alpha
+spec:
+  template:
+    metadata:
+      labels:
+        cost-center: cc-platform
+        team: alpha
+        environment: dev

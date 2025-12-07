@@ -1,0 +1,7 @@
+# Step 2: Verify alert expression uses correct metric name
+apiVersion: kuttl.dev/v1beta1
+kind: TestAssert
+timeout: 60
+commands:
+- script: |
+    kubectl get prometheusrule cnpe-memory-alert -n monitoring -o yaml | grep -q 'container_memory_working_set_bytes'

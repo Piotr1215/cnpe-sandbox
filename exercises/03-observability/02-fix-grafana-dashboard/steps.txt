@@ -1,0 +1,2 @@
+0:Fix ConfigMap label from grafana-dashboard to grafana_dashboard: "1"
+1:Fix datasource uid from wrong-datasource-uid to prometheus

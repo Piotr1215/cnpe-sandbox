@@ -1,0 +1,8 @@
+# Step 1: Verify PrometheusRule has release label for discovery
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: cnpe-memory-alert
+  namespace: monitoring
+  labels:
+    release: prometheus-stack

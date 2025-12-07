@@ -1,0 +1,9 @@
+# Step 1: Verify namespace has required cost allocation labels
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: cnpe-team-alpha
+  labels:
+    cost-center: cc-platform
+    team: alpha
+    environment: dev

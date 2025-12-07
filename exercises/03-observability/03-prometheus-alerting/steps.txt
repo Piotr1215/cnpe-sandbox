@@ -1,0 +1,4 @@
+0:Add release: prometheus-stack label for discovery
+1:Fix metric name to container_memory_working_set_bytes
+2:Add team label for alert routing
+3:Add description annotation with {{ $labels.pod }}

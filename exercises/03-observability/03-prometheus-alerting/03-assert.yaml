@@ -1,0 +1,7 @@
+# Step 4: Verify alert has description annotation with pod variable
+apiVersion: kuttl.dev/v1beta1
+kind: TestAssert
+timeout: 60
+commands:
+- script: |
+    kubectl get prometheusrule cnpe-memory-alert -n monitoring -o yaml | grep -q 'description:.*{{.*pod.*}}'

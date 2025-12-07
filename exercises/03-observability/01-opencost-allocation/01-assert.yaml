@@ -1,0 +1,10 @@
+# Step 2: Verify deployment has cost allocation labels
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cost-test-app
+  namespace: cnpe-team-alpha
+  labels:
+    cost-center: cc-platform
+    team: alpha
+    environment: dev

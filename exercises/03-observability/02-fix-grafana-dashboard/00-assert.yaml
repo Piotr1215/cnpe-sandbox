@@ -1,0 +1,8 @@
+# Step 1: Verify ConfigMap has correct sidecar label for discovery
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cnpe-dashboard
+  namespace: monitoring
+  labels:
+    grafana_dashboard: "1"

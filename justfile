@@ -44,6 +44,21 @@ gitops-tekton: (_run "01-gitops-cd" "03-tekton-trigger")
 # ArgoCD ApplicationSet environment promotion
 gitops-promotion: (_run "01-gitops-cd" "04-environment-promotion")
 
+# ==================== Observability Domain (20%) ====================
+
+# Run all Observability exercises
+domain-observability:
+  cd exercises/03-observability && kubectl kuttl test --config kuttl-test.yaml
+
+# Fix OpenCost cost allocation labels
+obs-cost: (_run "03-observability" "01-opencost-allocation")
+
+# Fix broken Grafana dashboard
+obs-grafana: (_run "03-observability" "02-fix-grafana-dashboard")
+
+# Fix Prometheus alerting rule
+obs-alerting: (_run "03-observability" "03-prometheus-alerting")
+
 # ==================== Security Domain (15%) ====================
 
 # Run all Security exercises
