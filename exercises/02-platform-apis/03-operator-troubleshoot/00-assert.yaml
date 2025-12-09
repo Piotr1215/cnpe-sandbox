@@ -1,0 +1,6 @@
+# Role exists
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: backup-operator-role
+  namespace: cnpe-operator-test

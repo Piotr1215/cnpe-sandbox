@@ -1,0 +1,6 @@
+# Deployment exists
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order-processor
+  namespace: cnpe-incident-test

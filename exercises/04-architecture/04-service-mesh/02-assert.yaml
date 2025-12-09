@@ -1,0 +1,7 @@
+# DestinationRule has subsets
+apiVersion: kuttl.dev/v1beta1
+kind: TestAssert
+commands:
+  - script: |
+      kubectl get destinationrule payment-versions -n cnpe-mesh-test -o yaml | grep -q 'name: stable' && \
+      kubectl get destinationrule payment-versions -n cnpe-mesh-test -o yaml | grep -q 'name: canary'

@@ -1,0 +1,5 @@
+# Role has databasebackups permissions
+apiVersion: kuttl.dev/v1beta1
+kind: TestAssert
+commands:
+  - script: kubectl get role backup-operator-role -n cnpe-operator-test -o yaml | grep -q 'databasebackups'

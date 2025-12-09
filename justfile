@@ -59,6 +59,12 @@ platform-crd: (_run "02-platform-apis" "01-create-platform-crd")
 # Add status subresource to CRD
 platform-crd-status: (_run "02-platform-apis" "02-crd-status-subresource")
 
+# Troubleshoot operator RBAC
+platform-operator: (_run "02-platform-apis" "03-operator-troubleshoot")
+
+# Self-service provisioning with Crossplane
+platform-selfservice: (_run "02-platform-apis" "04-self-service-workflow")
+
 # ==================== Observability Domain (20%) ====================
 
 # Run all Observability exercises
@@ -77,6 +83,9 @@ obs-alerting: (_run "03-observability" "03-prometheus-alerting")
 # Configure Jaeger tracing for application
 obs-tracing: (_run "03-observability" "04-jaeger-tracing")
 
+# Diagnose and fix pod failure incident
+obs-incident: (_run "03-observability" "05-incident-diagnosis")
+
 # ==================== Architecture Domain (15%) ====================
 
 # Run all Architecture exercises
@@ -91,6 +100,9 @@ arch-quota: (_run "04-architecture" "02-resource-quota")
 
 # Configure StorageClass for persistent storage
 arch-storage: (_run "04-architecture" "03-storage-class")
+
+# Configure Istio VirtualService traffic splitting
+arch-mesh: (_run "04-architecture" "04-service-mesh")
 
 # ==================== Security Domain (15%) ====================
 

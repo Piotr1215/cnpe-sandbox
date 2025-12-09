@@ -1,0 +1,7 @@
+# Deployment uses valid image
+apiVersion: kuttl.dev/v1beta1
+kind: TestAssert
+commands:
+  - script: |
+      # Image should not contain the broken tag
+      ! kubectl get deploy order-processor -n cnpe-incident-test -o yaml | grep -q '99.99-nonexistent'

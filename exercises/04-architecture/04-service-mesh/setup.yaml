@@ -1,0 +1,67 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: cnpe-mesh-test
+  labels:
+    istio-injection: enabled
+---
+# Stable v1 deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payment-service-v1
+  namespace: cnpe-mesh-test
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: payment-service
+      version: v1
+  template:
+    metadata:
+      labels:
+        app: payment-service
+        version: v1
+    spec:
+      containers:
+        - name: app
+          image: nginx:1.25
+          ports:
+            - containerPort: 8080
+---
+# Canary v2 deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payment-service-v2
+  namespace: cnpe-mesh-test
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: payment-service
+      version: v2
+  template:
+    metadata:
+      labels:
+        app: payment-service
+        version: v2
+    spec:
+      containers:
+        - name: app
+          image: nginx:1.26
+          ports:
+            - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: payment-service
+  namespace: cnpe-mesh-test
+spec:
+  selector:
+    app: payment-service
+  ports:
+    - port: 80
+      targetPort: 8080
+# Task: Create VirtualService and DestinationRule for traffic splitting

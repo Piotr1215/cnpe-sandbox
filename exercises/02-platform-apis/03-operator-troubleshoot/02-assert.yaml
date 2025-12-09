@@ -1,0 +1,9 @@
+# Operator can access the CRs
+apiVersion: kuttl.dev/v1beta1
+kind: TestAssert
+commands:
+  - script: |
+      # Verify operator SA can list databasebackups
+      kubectl auth can-i list databasebackups.platform.cnpe.io \
+        --as=system:serviceaccount:cnpe-operator-test:backup-operator \
+        -n cnpe-operator-test | grep -q 'yes'

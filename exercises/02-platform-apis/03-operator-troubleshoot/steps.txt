@@ -1,0 +1,3 @@
+0:Role exists in namespace
+1:Add databasebackups resource to Role
+2:Operator service account can access CRs

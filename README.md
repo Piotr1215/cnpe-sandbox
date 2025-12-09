@@ -9,17 +9,9 @@ An unofficial practice environment for CNPE exam preparation. These are hands-on
 ## Quick Start
 
 ```bash
-# Setup kind cluster with all tools (~10-15 min)
-just setup
-
-# List available exercises
-just list
-
-# Run an exercise
-just gitops-fix
-
-# Teardown when done
-just teardown
+just setup          # kind cluster + tools (~10-15 min)
+just gitops-fix     # run an exercise
+just teardown       # cleanup
 ```
 
 ## CNPE Exam Overview
@@ -34,16 +26,12 @@ just teardown
 
 ## Prerequisites
 
-**Local kind cluster** (created by `just setup`):
-- Docker
-- kind
-- kubectl
-- helm
-- [kuttl](https://kuttl.dev/docs/cli.html)
+**Required** (for `just setup`):
+- Docker, kind, kubectl, helm, [kuttl](https://kuttl.dev/docs/cli.html)
 
-**CLI tools** (via devbox):
+**Optional** CLI tools via devbox:
 ```bash
-devbox shell  # activates argocd, tkn, kyverno, istioctl
+devbox shell  # argocd, tkn, kyverno, istioctl
 ```
 
 ## Installed Components
@@ -64,27 +52,14 @@ The setup script installs these exam-relevant tools:
 
 ## Exercises
 
-### GitOps and Continuous Delivery (25%)
-
-| Exercise | Command | Description |
-|----------|---------|-------------|
-| Fix Broken Sync | `just gitops-fix` | Debug ArgoCD sync issues |
-| Canary Deployment | `just gitops-canary` | Configure Argo Rollouts |
-| Tekton Trigger | `just gitops-tekton` | Fix Tekton EventListener |
-| Environment Promotion | `just gitops-promotion` | ApplicationSet patterns (TODO) |
-
-### Security and Policy (15%)
-
-| Exercise | Command | Description |
-|----------|---------|-------------|
-| Fix Broken Policy | `just security-policy` | Debug Kyverno policy |
-| RBAC Troubleshoot | `just security-rbac` | Fix Role/RoleBinding |
-
-### Run All Exercises in a Domain
+22 exercises across 5 domains. See [SOLUTIONS.md](SOLUTIONS.md) for concepts and answers.
 
 ```bash
-just domain-gitops     # All GitOps exercises
-just domain-security   # All Security exercises
+just domain-gitops        # or: just gitops-fix, just gitops-canary, ...
+just domain-platform
+just domain-observability
+just domain-architecture
+just domain-security
 ```
 
 ## How KUTTL Progressive Testing Works

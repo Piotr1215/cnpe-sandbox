@@ -1,0 +1,5 @@
+# Composition exists
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: database-composition

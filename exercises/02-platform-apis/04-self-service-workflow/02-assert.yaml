@@ -1,0 +1,5 @@
+# DatabaseRequest claim exists
+apiVersion: kuttl.dev/v1beta1
+kind: TestAssert
+commands:
+  - script: kubectl get databaserequest test-db -n cnpe-selfservice-test

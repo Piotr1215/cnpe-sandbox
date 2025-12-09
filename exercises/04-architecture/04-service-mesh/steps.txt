@@ -1,0 +1,3 @@
+0:Create VirtualService with payment-service host
+1:Configure 90/10 traffic weights to stable/canary subsets
+2:Create DestinationRule with stable and canary subsets
