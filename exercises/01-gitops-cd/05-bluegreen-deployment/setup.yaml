@@ -1,0 +1,6 @@
+# Namespace for the exercise
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: cnpe-bluegreen-test
+# Task: Create services and Rollout for Blue/Green deployment

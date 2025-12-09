@@ -1,0 +1,5 @@
+# Pod is running
+apiVersion: kuttl.dev/v1beta1
+kind: TestAssert
+commands:
+  - script: kubectl rollout status deploy/api-server -n production --timeout=60s

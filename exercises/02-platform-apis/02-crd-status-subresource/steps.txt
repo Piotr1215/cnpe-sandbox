@@ -1,0 +1,3 @@
+0:Add 'subresources: status: {}' to CRD version spec
+1:Add status schema with phase (string) and conditions (array) properties
+2:Create DatabaseClaim 'test-db' and update its status.phase to 'Ready'

@@ -1,0 +1,8 @@
+# Tenant namespace is pre-created
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: team-alpha
+  labels:
+    tenant: alpha
+# Task: Configure ResourceQuota and LimitRange for multi-tenant isolation

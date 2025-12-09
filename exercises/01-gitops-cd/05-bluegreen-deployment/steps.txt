@@ -1,0 +1,3 @@
+0:Create payment-api-active and payment-api-preview Services with app: payment-api selector
+1:Create Rollout with blueGreen strategy referencing both services
+2:Verify Rollout is Healthy or Progressing

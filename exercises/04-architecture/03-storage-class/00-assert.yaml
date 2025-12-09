@@ -1,0 +1,5 @@
+# StorageClass exists with Retain policy
+apiVersion: kuttl.dev/v1beta1
+kind: TestAssert
+commands:
+  - script: kubectl get storageclass fast-storage -o jsonpath='{.reclaimPolicy}' | grep -q Retain

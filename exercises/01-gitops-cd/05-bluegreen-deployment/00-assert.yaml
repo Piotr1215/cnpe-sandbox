@@ -1,0 +1,10 @@
+# Rollout exists with blueGreen strategy
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: payment-api
+  namespace: cnpe-bluegreen-test
+spec:
+  strategy:
+    blueGreen:
+      activeService: payment-api-active

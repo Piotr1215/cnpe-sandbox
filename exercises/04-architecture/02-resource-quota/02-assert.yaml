@@ -1,0 +1,8 @@
+# Test pod running with defaults applied
+apiVersion: v1
+kind: Pod
+metadata:
+  name: test-defaults
+  namespace: team-alpha
+status:
+  phase: Running

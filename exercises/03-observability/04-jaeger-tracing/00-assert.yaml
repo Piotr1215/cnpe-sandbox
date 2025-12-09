@@ -1,0 +1,6 @@
+# order-service deployment exists
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order-service
+  namespace: cnpe-tracing-test

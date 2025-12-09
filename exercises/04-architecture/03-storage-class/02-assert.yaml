@@ -1,0 +1,5 @@
+# PVC exists with correct StorageClass
+apiVersion: kuttl.dev/v1beta1
+kind: TestAssert
+commands:
+  - script: kubectl get pvc test-data -n cnpe-storage-test -o jsonpath='{.spec.storageClassName}' | grep -q fast-storage

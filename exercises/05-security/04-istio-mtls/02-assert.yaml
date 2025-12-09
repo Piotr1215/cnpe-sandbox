@@ -1,0 +1,6 @@
+# Service and Deployment exist
+apiVersion: v1
+kind: Service
+metadata:
+  name: payment-api
+  namespace: payments

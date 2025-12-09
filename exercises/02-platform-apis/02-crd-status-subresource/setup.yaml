@@ -1,0 +1,6 @@
+# Namespace for the exercise
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: cnpe-crd-status-test
+# Task: Create CRD with status subresource and a DatabaseClaim instance

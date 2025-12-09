@@ -1,0 +1,8 @@
+# DatabaseClaim instance exists
+apiVersion: platform.cnpe.io/v1
+kind: DatabaseClaim
+metadata:
+  name: test-db
+  namespace: cnpe-crd-status-test
+spec:
+  engine: postgres

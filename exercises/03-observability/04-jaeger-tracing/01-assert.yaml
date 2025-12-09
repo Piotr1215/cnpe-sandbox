@@ -1,0 +1,5 @@
+# Deployment has OTEL endpoint configured
+apiVersion: kuttl.dev/v1beta1
+kind: TestAssert
+commands:
+  - script: kubectl get deploy order-service -n cnpe-tracing-test -o yaml | grep -q 'jaeger-collector:4317'

@@ -1,0 +1,3 @@
+0:Create ApplicationSet with List generator using 'elements' array
+1:Configure template with {{env}} and {{namespace}} parameter substitution
+2:Verify Applications demo-app-dev, demo-app-staging, demo-app-prod are created

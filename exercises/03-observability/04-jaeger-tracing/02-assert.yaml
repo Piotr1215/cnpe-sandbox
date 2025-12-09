@@ -1,0 +1,5 @@
+# Pod is running
+apiVersion: kuttl.dev/v1beta1
+kind: TestAssert
+commands:
+  - script: kubectl rollout status deploy/order-service -n cnpe-tracing-test --timeout=60s

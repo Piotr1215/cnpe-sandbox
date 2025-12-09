@@ -1,0 +1,3 @@
+0:Create ResourceQuota 'team-alpha-quota' with cpu/memory limits and pod count
+1:Create LimitRange 'team-alpha-limits' with default cpu/memory and max limits
+2:Create pod 'test-defaults' without resources, verify defaults applied

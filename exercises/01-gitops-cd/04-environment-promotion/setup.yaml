@@ -1,0 +1,16 @@
+# Environment namespaces are pre-created
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: demo-dev
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: demo-staging
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: demo-prod
+# Task: Create an ApplicationSet that deploys to all three environments

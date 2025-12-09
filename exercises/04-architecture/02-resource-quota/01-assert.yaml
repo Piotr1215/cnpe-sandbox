@@ -1,0 +1,6 @@
+# LimitRange exists with defaults
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: team-alpha-limits
+  namespace: team-alpha

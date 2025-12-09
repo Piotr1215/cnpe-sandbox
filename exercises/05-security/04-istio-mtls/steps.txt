@@ -1,0 +1,3 @@
+0:Create PeerAuthentication with mtls mode: STRICT for payments namespace
+1:Create DestinationRule with tls mode: ISTIO_MUTUAL for payment-api service
+2:Verify payment-api pod has istio-proxy sidecar injected

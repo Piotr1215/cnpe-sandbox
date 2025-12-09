@@ -1,0 +1,3 @@
+0:Add PSS labels to namespace (pod-security.kubernetes.io/enforce: restricted)
+1:Fix deployment security context (runAsNonRoot, allowPrivilegeEscalation, capabilities, seccompProfile)
+2:Verify pod is running in production namespace

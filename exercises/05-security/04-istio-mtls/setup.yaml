@@ -1,0 +1,8 @@
+# Payments namespace with Istio injection enabled
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: payments
+  labels:
+    istio-injection: enabled
+# Task: Configure PeerAuthentication, DestinationRule, and deploy service

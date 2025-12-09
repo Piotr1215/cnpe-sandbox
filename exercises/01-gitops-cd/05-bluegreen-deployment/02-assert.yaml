@@ -1,0 +1,6 @@
+# Preview service exists
+apiVersion: v1
+kind: Service
+metadata:
+  name: payment-api-preview
+  namespace: cnpe-bluegreen-test

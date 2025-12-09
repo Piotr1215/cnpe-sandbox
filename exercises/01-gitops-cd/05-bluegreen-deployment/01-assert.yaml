@@ -1,0 +1,6 @@
+# Active service exists
+apiVersion: v1
+kind: Service
+metadata:
+  name: payment-api-active
+  namespace: cnpe-bluegreen-test

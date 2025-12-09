@@ -1,0 +1,6 @@
+# Production namespace without PSS labels
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: production
+# Task: Apply PSS labels and create compliant deployment

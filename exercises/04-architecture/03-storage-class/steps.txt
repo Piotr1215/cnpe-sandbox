@@ -1,0 +1,3 @@
+0:Change StorageClass reclaimPolicy from Delete to Retain (requires recreation)
+1:Change volumeBindingMode from Immediate to WaitForFirstConsumer
+2:Create PVC 'test-data' using fast-storage StorageClass

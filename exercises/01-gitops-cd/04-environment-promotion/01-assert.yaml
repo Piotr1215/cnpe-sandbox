@@ -1,0 +1,9 @@
+# Dev Application created from template
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: demo-app-dev
+  namespace: argocd
+spec:
+  destination:
+    namespace: demo-dev
