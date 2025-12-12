@@ -105,7 +105,11 @@ wait
 
 # Batch 3: Depends on istiod + prometheus
 helm install ztunnel istio/ztunnel -n istio-system >/dev/null 2>&1 &
-helm install opencost opencost/opencost -n opencost --create-namespace --set opencost.prometheus.external.url=http://prometheus-stack-kube-prom-prometheus.monitoring.svc:9090 >/dev/null 2>&1 &
+helm upgrade --install opencost opencost/opencost \
+  -n opencost --create-namespace \
+  --set opencost.prometheus.external.enabled=true \
+  --set opencost.prometheus.external.url=http://prometheus-stack-kube-prom-prometheus.monitoring.svc:9090 \
+  --set opencost.prometheus.internal.enabled=false >/dev/null 2>&1 &
 
 until show_progress 12; do sleep 2; done
 wait
