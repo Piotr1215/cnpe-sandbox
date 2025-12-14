@@ -83,12 +83,13 @@ Tekton provides Kubernetes-native CI/CD primitives:
 
 - **Task**: A series of steps (containers) that run sequentially
 - **Pipeline**: DAG of Tasks with inputs/outputs
-- **Trigger**: Responds to events (webhooks, messages)
-- **EventListener**: HTTP endpoint that receives events
+- **TriggerTemplate**: Defines what PipelineRun to create when triggered
+- **TriggerBinding**: Extracts parameters from webhook payloads using JSONPath
+- **EventListener**: HTTP endpoint that receives webhook events (requires additional infrastructure)
 
-The power is composability—Tasks are reusable across Pipelines, and Triggers decouple event sources from pipeline execution.
+The key to Tekton Triggers is the parameter flow: TriggerBinding extracts data from events (like GitHub webhooks) and passes it to TriggerTemplate, which creates a PipelineRun with those parameters.
 
-**Exercise:** [gitops-tekton](exercises/01-gitops-cd/03-tekton-trigger/answer.md)
+**Exercise:** [gitops-tekton](exercises/01-gitops-cd/03-tekton-trigger/answer.md) - Focuses on TriggerTemplate/TriggerBinding configuration
 
 ---
 
@@ -143,12 +144,37 @@ Common operator failures:
 Crossplane extends the operator pattern to provision any infrastructure. Key concepts:
 
 - **XRD (CompositeResourceDefinition)**: Defines your platform API (e.g., DatabaseRequest)
-- **Composition**: Maps your API to actual infrastructure resources
+- **Composition**: Maps your API to actual infrastructure resources via pipeline mode
 - **Claim**: Namespaced resource developers create
+- **Functions**: Composition functions transform and generate resources dynamically
+
+**Crossplane v2 Pipeline Mode:**
+
+In Crossplane v2, Compositions use pipeline mode with functions instead of the deprecated resources field:
+
+```yaml
+spec:
+  mode: Pipeline  # New in v2
+  pipeline:
+    - step: patch-and-transform
+      functionRef:
+        name: function-patch-and-transform
+      input:
+        apiVersion: pt.fn.crossplane.io/v1beta1
+        kind: Resources
+        resources:
+          - name: my-resource
+            base: {...}
+```
+
+Benefits of pipeline mode:
+- Functions can be chained for complex transformations
+- Better separation of composition logic from resource templates
+- More flexible and composable than v1 resources approach
 
 The power is abstraction—developers request a "small postgres database" without knowing if it's RDS, Cloud SQL, or a StatefulSet.
 
-**Exercise:** [platform-selfservice](exercises/02-platform-apis/04-self-service-workflow/answer.md)
+**Exercise:** [platform-selfservice](exercises/02-platform-apis/04-self-service-workflow/answer.md) - Uses Crossplane v2 pipeline mode
 
 ---
 

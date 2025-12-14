@@ -1,6 +1,6 @@
 # Solution: Implement Self-Service Provisioning Workflow
 
-## Solution
+## Solution (Crossplane v2 Pipeline Mode)
 
 ```bash
 kubectl apply -f - <<'EOF'
@@ -36,30 +36,38 @@ spec:
                   enum: [postgres, mysql]
               required: [size, engine]
 ---
-# Composition - Defines what gets created
+# Composition - Uses v2 pipeline mode with function-patch-and-transform
 apiVersion: apiextensions.crossplane.io/v1
 kind: Composition
 metadata:
   name: database-composition
 spec:
+  mode: Pipeline
   compositeTypeRef:
     apiVersion: platform.cnpe.io/v1
     kind: XDatabaseRequest
-  resources:
-    - name: connection-config
-      base:
-        apiVersion: kubernetes.crossplane.io/v1alpha2
-        kind: Object
-        spec:
-          forProvider:
-            manifest:
-              apiVersion: v1
-              kind: ConfigMap
-              metadata:
-                namespace: cnpe-selfservice-test
-              data:
-                host: "db.internal"
-                port: "5432"
+  pipeline:
+    - step: patch-and-transform
+      functionRef:
+        name: function-patch-and-transform
+      input:
+        apiVersion: pt.fn.crossplane.io/v1beta1
+        kind: Resources
+        resources:
+          - name: connection-config
+            base:
+              apiVersion: kubernetes.crossplane.io/v1alpha2
+              kind: Object
+              spec:
+                forProvider:
+                  manifest:
+                    apiVersion: v1
+                    kind: ConfigMap
+                    metadata:
+                      namespace: cnpe-selfservice-test
+                    data:
+                      host: "db.internal"
+                      port: "5432"
 ---
 # Test claim
 apiVersion: platform.cnpe.io/v1
@@ -73,6 +81,19 @@ spec:
 EOF
 ```
 
+## Crossplane v2 Changes
+
+**Key differences from v1:**
+- Uses `mode: Pipeline` instead of `resources` field
+- Functions declared in `pipeline` array (function-patch-and-transform)
+- Resources defined in function `input` block
+- More flexible and composable than v1 resources
+
+**Why pipeline mode?**
+- Functions can transform, validate, and generate resources dynamically
+- Multiple functions can be chained in sequence
+- Better separation of concerns (composition logic vs resource templates)
+
 ## Why This Matters
 
 Self-service provisioning enables:
@@ -80,3 +101,4 @@ Self-service provisioning enables:
 - **Standardization**: Platform controls what gets created
 - **Guardrails**: XRD schema enforces valid inputs
 - **Abstraction**: Hide infrastructure complexity
+- **Composition Functions**: v2 pipeline mode provides powerful resource generation patterns

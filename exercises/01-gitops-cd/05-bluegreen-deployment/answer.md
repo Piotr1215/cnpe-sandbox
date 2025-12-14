@@ -48,6 +48,13 @@ spec:
           image: nginx:1.25
           ports:
             - containerPort: 8080
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "64Mi"
+            limits:
+              cpu: "100m"
+              memory: "128Mi"
   strategy:
     blueGreen:
       activeService: payment-api-active
