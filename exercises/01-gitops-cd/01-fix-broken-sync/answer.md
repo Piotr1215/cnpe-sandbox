@@ -2,9 +2,8 @@
 
 ## What Was Broken
 
-The Application `cnpe-broken-app` has two problems:
+The Application `cnpe-broken-app` is misconfigured:
 - **Wrong `spec.source.path`**: `guestbook-broken` (does not exist in repo)
-- **Invalid field `spec.invalidField`**: This field is not a valid field in the Application spec.
 
 ## How to Diagnose
 1. Check Application status:
@@ -15,16 +14,15 @@ The Application `cnpe-broken-app` has two problems:
 3. The Argo CD controller will also log an error about the invalid field.
 
 ## Solution
-Edit the Application and fix the path and remove the invalid field:
+Edit the Application and fix the path:
 ```bash
-kubectl patch app cnpe-broken-app -n argocd --type json -p='[{"op": "replace", "path": "/spec/source/path", "value": "guestbook"}, {"op": "remove", "path": "/spec/invalidField"}]'
+kubectl patch app cnpe-broken-app -n argocd --type json -p='[{"op": "replace", "path": "/spec/source/path", "value": "guestbook"}]'
 ```
 Or edit directly:
 ```bash
 kubectl edit app cnpe-broken-app -n argocd
 # Change: path: guestbook-broken
 # To:     path: guestbook
-# Remove: invalidField: "this is an invalid field"
 ```
 
 ## Alternative Valid Paths

@@ -4,6 +4,7 @@ metadata:
   name: cnpe-broken-app
   namespace: argocd
 status:
+  # Application should eventually become Synced and Healthy once user fixes source path
   sync:
     status: Synced
   health:
