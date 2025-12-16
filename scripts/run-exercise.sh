@@ -3,6 +3,7 @@ set -eo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 EXERCISES_DIR="${SCRIPT_DIR}/../exercises"
+EXIT_CODE=0
 
 # Colors
 RED='\033[0;31m'
@@ -133,7 +134,8 @@ cleanup_exercise() {
 
 # Master cleanup
 cleanup_all() {
-    local exit_code=$?
+    set +e
+    local exit_code=${EXIT_CODE:-$?}
 
     [[ -n "${TIMER_PID:-}" ]] && kill $TIMER_PID 2>/dev/null || true
 
@@ -203,14 +205,15 @@ if [[ "$CHECK_ONLY" == "true" ]]; then
         echo -e "${GREEN}╔═══════════════════════════════════════════════════════════════╗${NC}"
         echo -e "${GREEN}║  ✓ PASSED                                                     ║${NC}"
         echo -e "${GREEN}╚═══════════════════════════════════════════════════════════════╝${NC}"
+        EXIT_CODE=0
     else
         echo ""
         echo -e "${RED}╔═══════════════════════════════════════════════════════════════╗${NC}"
         echo -e "${RED}║  ✗ FAILED - Review the diff above                             ║${NC}"
         echo -e "${RED}╚═══════════════════════════════════════════════════════════════╝${NC}"
-        exit 1
+        EXIT_CODE=1
     fi
-    exit 0
+    exit $EXIT_CODE
 fi
 
 # Full run mode
@@ -396,10 +399,13 @@ if [[ "$KUTTL_EXIT" == "0" ]]; then
         echo -e "${YELLOW}║  Over 7-minute target - practice more!                        ║${NC}"
     fi
     echo -e "${GREEN}╚═══════════════════════════════════════════════════════════════╝${NC}"
+    EXIT_CODE=0
 else
     echo -e "${RED}╔═══════════════════════════════════════════════════════════════╗${NC}"
     printf "${RED}║  ✗ FAILED after %d:%02d                                         ║${NC}\n" $((ELAPSED / 60)) $((ELAPSED % 60))
     echo -e "${RED}║  Review the errors above                                      ║${NC}"
     echo -e "${RED}╚═══════════════════════════════════════════════════════════════╝${NC}"
-    exit 1
+    EXIT_CODE=1
 fi
+
+exit $EXIT_CODE
