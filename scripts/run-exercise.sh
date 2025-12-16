@@ -21,15 +21,18 @@ if [[ "$CURRENT_CONTEXT" != "kind-cnpe" ]]; then
     exit 1
 fi
 
-# Domain descriptions for context
-declare -A DOMAIN_DESC=(
-    ["01-gitops-cd"]="GitOps and Continuous Delivery (25%)"
-    ["02-platform-apis"]="Platform APIs and Self-Service (25%)"
-    ["03-observability"]="Observability and Operations (20%)"
-    ["04-architecture"]="Platform Architecture (15%)"
-    ["05-security"]="Security and Policy Enforcement (15%)"
-    ["00-test-setup"]="Test Setup (validation only)"
-)
+# Domain description (portable across bash versions)
+get_domain_desc() {
+    case "$1" in
+        "01-gitops-cd") echo "GitOps and Continuous Delivery (25%)" ;;
+        "02-platform-apis") echo "Platform APIs and Self-Service (25%)" ;;
+        "03-observability") echo "Observability and Operations (20%)" ;;
+        "04-architecture") echo "Platform Architecture (15%)" ;;
+        "05-security") echo "Security and Policy Enforcement (15%)" ;;
+        "00-test-setup") echo "Test Setup (validation only)" ;;
+        *) echo "Unknown" ;;
+    esac
+}
 
 usage() {
     cat <<'USAGE_EOF'
@@ -101,20 +104,30 @@ if [[ -f "$SETUP_FILE" ]]; then
     fi
 fi
 
-# Cleanup function
+# Cleanup function (idempotent, tolerate partial failures)
+CLEANED="false"
 cleanup_exercise() {
     if [[ "$NO_CLEANUP" == "true" ]]; then
         echo -e "${YELLOW}Skipping cleanup (--no-cleanup)${NC}"
         return
     fi
 
-    if [[ -n "$EXERCISE_NS" ]]; then
-        echo -e "${YELLOW}Cleaning up namespace: ${EXERCISE_NS}...${NC}"
-        kubectl delete namespace "$EXERCISE_NS" --wait=false 2>/dev/null || true
+    # Prevent running twice
+    if [[ "$CLEANED" == "true" ]]; then
+        return
+    fi
+    CLEANED="true"
+
+    # Delete resources defined in setup (excluding Namespace) first
+    if [[ -f "$SETUP_FILE" ]]; then
+        # Best-effort: ignore not found and validation issues
+        kubectl delete -f "$SETUP_FILE" --ignore-not-found=true 2>/dev/null || true
     fi
 
-    if [[ -f "$SETUP_FILE" ]]; then
-        kubectl delete -f "$SETUP_FILE" 2>/dev/null || true
+    # Then delete the exercise namespace (if any)
+    if [[ -n "$EXERCISE_NS" ]]; then
+        echo -e "${YELLOW}Cleaning up namespace: ${EXERCISE_NS}...${NC}"
+        kubectl delete namespace "$EXERCISE_NS" --ignore-not-found=true --wait=false 2>/dev/null || true
     fi
 }
 
@@ -146,7 +159,7 @@ fi
 clear
 echo -e "${BLUE}╔═══════════════════════════════════════════════════════════════╗${NC}"
 printf "${BLUE}║${NC} ${BOLD}%-61s${NC} ${BLUE}║${NC}\n" "CNPE Exercise: ${EXERCISE_PATH}"
-printf "${BLUE}║${NC} ${CYAN}%-61s${NC} ${BLUE}║${NC}\n" "Category: ${DOMAIN_DESC[$DOMAIN]:-Unknown}"
+printf "${BLUE}║${NC} ${CYAN}%-61s${NC} ${BLUE}║${NC}\n" "Category: $(get_domain_desc "$DOMAIN")"
 printf "${BLUE}║${NC} ${CYAN}%-61s${NC} ${BLUE}║${NC}\n" "Time Limit: $((TIMEOUT / 60)) minutes"
 echo -e "${BLUE}╚═══════════════════════════════════════════════════════════════╝${NC}"
 echo ""
@@ -183,7 +196,7 @@ if [[ "$CHECK_ONLY" == "true" ]]; then
     echo -e "${YELLOW}Verifying your solution...${NC}"
     echo ""
 
-    KUTTL_CMD="kubectl-kuttl test ${DOMAIN_DIR} --config ${DOMAIN_DIR}/kuttl-test.yaml --test ${EXERCISE} --timeout ${TIMEOUT}"
+    KUTTL_CMD="kubectl kuttl test ${DOMAIN_DIR} --config ${DOMAIN_DIR}/kuttl-test.yaml --test ${EXERCISE} --timeout ${TIMEOUT}"
 
     if $KUTTL_CMD; then
         echo ""
@@ -209,7 +222,12 @@ echo "  3. KUTTL continuously checks until pass or timeout"
 echo "  4. Cleanup runs automatically (pass, fail, or Ctrl+C)"
 echo ""
 echo -e "${YELLOW}Press Enter to start timer...${NC}"
-read -r
+if [ -t 0 ]; then
+    read -r
+else
+    echo -e "${YELLOW}(non-interactive) continuing...${NC}"
+    sleep 1
+fi
 
 CLEANUP_ON_EXIT=true
 trap cleanup_all EXIT INT TERM
@@ -251,7 +269,7 @@ TOTAL_STEPS=$(find "$EXERCISE_DIR" -maxdepth 1 -name "*-assert.yaml" 2>/dev/null
 CURRENT_STEP=0
 
 KUTTL_STATUS=$(mktemp)
-KUTTL_CMD="kubectl-kuttl test ${DOMAIN_DIR} --config ${DOMAIN_DIR}/kuttl-test.yaml --test ${EXERCISE} --timeout ${TIMEOUT}"
+KUTTL_CMD="kubectl kuttl test ${DOMAIN_DIR} --config ${DOMAIN_DIR}/kuttl-test.yaml --test ${EXERCISE} --timeout ${TIMEOUT}"
 
 echo -e "${CYAN}Checking assertions...${NC}"
 echo ""

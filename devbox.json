@@ -4,7 +4,8 @@
     "argocd@3.1.8",
     "istioctl@1.28.0",
     "kyverno@1.15.2",
-    "tektoncd-cli@0.43.0"
+    "tektoncd-cli@0.43.0",
+    "yq-go@4.44.3"
   ],
   "shell": {
     "init_hook": [

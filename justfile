@@ -14,6 +14,22 @@ setup:
 teardown:
   kind delete cluster --name cnpe
 
+# Verify required tools are installed
+check:
+  ./scripts/check.sh
+
+# Install developer CLIs (macOS Homebrew)
+install-cli:
+  bash ./scripts/install-cli.sh
+
+# Upgrade developer CLIs
+upgrade-cli:
+  bash ./scripts/upgrade-cli.sh
+
+# Preflight validation for exercises
+preflight:
+  python3 ./scripts/preflight.py
+
 # ==================== Exercises ====================
 
 # List all exercises

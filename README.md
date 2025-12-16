@@ -1,5 +1,7 @@
 # CNPE Exam Preparation Lab
 
+[![Preflight](https://github.com/hosseinsalahi/cnpe-sandbox/actions/workflows/preflight.yml/badge.svg)](https://github.com/hosseinsalahi/cnpe-sandbox/actions/workflows/preflight.yml)
+
 Interactive preparation for the **Certified Cloud Native Platform Engineer (CNPE)** exam using progressive testing with [KUTTL](https://kuttl.dev/).
 
 ## What is This?
@@ -12,6 +14,8 @@ An unofficial practice environment for CNPE exam preparation. These are hands-on
 just setup          # kind cluster + tools (~10-15 min)
 just gitops-fix     # run an exercise
 just teardown       # cleanup
+just check          # verify required tooling
+just preflight      # validate exercises & asserts
 ```
 
 ## CNPE Exam Overview
@@ -28,11 +32,60 @@ just teardown       # cleanup
 
 **Required** (for `just setup`):
 - Docker, kind, kubectl, helm, [kuttl](https://kuttl.dev/docs/cli.html)
+  - KUTTL must be installed as the kubectl plugin so `kubectl kuttl` works
+  - Python 3 with PyYAML for helper output in the runner (`pip install pyyaml`)
 
 **Optional** CLI tools via devbox:
 ```bash
 devbox shell  # argocd, tkn, kyverno, istioctl
 ```
+Or install `yq` locally, which is recommended for YAML parsing in tooling.
+
+## CLI Install (if not using devbox)
+
+macOS (Homebrew):
+```bash
+brew install kuttl kind kubernetes-cli helm istioctl tektoncd-cli argocd kyverno yq
+python3 -m pip install --user pyyaml
+```
+
+Ubuntu/Debian (examples):
+```bash
+sudo apt-get update && sudo apt-get install -y docker.io
+curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.20.0/kind-linux-amd64 && chmod +x ./kind && sudo mv ./kind /usr/local/bin/
+curl -LO "https://dl.k8s.io/release/$(curl -Ls https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" && chmod +x kubectl && sudo mv kubectl /usr/local/bin/
+brew install helm || curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+python3 -m pip install --user kuttl pyyaml
+```
+
+Tip: `just check` will confirm everything is available.
+
+To install CLIs via Homebrew on macOS using a single command:
+```bash
+just install-cli
+```
+
+On Linux, either print or apply recommended install commands:
+```bash
+# Print commands for your distro
+just install-cli --print
+
+# Apply commands (uses sudo for installs)
+just install-cli --apply
+```
+
+Upgrade the CLI tools later with:
+```bash
+just upgrade-cli
+```
+
+## CI
+
+Every PR runs a preflight validation in GitHub Actions to ensure all exercise setups and asserts are valid:
+```bash
+python3 scripts/preflight.py
+```
+See `.github/workflows/preflight.yml`.
 
 ## Installed Components
 
