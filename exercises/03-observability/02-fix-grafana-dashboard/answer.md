@@ -35,6 +35,16 @@ kubectl patch configmap cnpe-dashboard -n monitoring --type=merge -p "{\"data\":
 
 ## Why This Matters
 
-- Grafana sidecars auto-discover dashboards via labels
-- Datasource UIDs must match what's configured in Grafana
-- kube-prometheus-stack creates a datasource with uid `prometheus`
+## Issue 3: Non-Existent Metric
+The "CPU Usage by Pod" panel uses a non-existent metric called `non_existent_metric`. This needs to be corrected to `container_cpu_usage_seconds_total`.
+
+```bash
+# Get the current ConfigMap
+kubectl get configmap cnpe-dashboard -n monitoring -o yaml > /tmp/dashboard.yaml
+
+# Edit and replace the non-existent metric with the correct one
+sed -i 's/non_existent_metric/container_cpu_usage_seconds_total/g' /tmp/dashboard.yaml
+
+# Apply the fix
+kubectl apply -f /tmp/dashboard.yaml
+```

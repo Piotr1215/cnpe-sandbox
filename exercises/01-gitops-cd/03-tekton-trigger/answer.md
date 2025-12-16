@@ -43,28 +43,28 @@ spec:
       value: $(body.repository.clone_url)
 ```
 
-## Phase 3: Test the Trigger
+## Phase 3: Verify Configuration
 
-Send a test webhook:
+Check that both resources are correctly configured:
 ```bash
-kubectl run curl-test --rm -i --restart=Never --image=curlimages/curl -- \
-  curl -s -X POST http://el-build-trigger.cnpe-tekton-test.svc.cluster.local:8080 \
-  -H "Content-Type: application/json" \
-  -d '{"repository":{"clone_url":"https://github.com/example/app"}}'
+# Verify TriggerTemplate
+kubectl get triggertemplate build-trigger-template -n cnpe-tekton-test -o yaml
+
+# Verify TriggerBinding
+kubectl get triggerbinding build-trigger-binding -n cnpe-tekton-test -o yaml
 ```
 
-Verify PipelineRun created:
-```bash
-tkn pr list -n cnpe-tekton-test
-tkn pr logs -n cnpe-tekton-test --last
-```
+The TriggerTemplate should reference `build-app` pipeline and TriggerBinding should extract `repo-url` from `$(body.repository.clone_url)`.
 
 ## Key Concepts
 
 1. **TriggerTemplate** - Defines the resource (PipelineRun) to create when triggered
 2. **TriggerBinding** - Extracts parameters from webhook payload using JSONPath
-3. **EventListener** - HTTP endpoint that receives webhooks and connects bindings to templates
-4. **Parameter flow**: Webhook payload → TriggerBinding → TriggerTemplate → PipelineRun
+3. **Parameter flow**: TriggerBinding extracts data → TriggerTemplate creates PipelineRun with parameters
+
+## Note on EventListeners
+
+This exercise focuses on TriggerTemplate/TriggerBinding configuration. In production, you would add an EventListener to expose an HTTP endpoint for webhooks, but that requires additional Tekton Triggers infrastructure (core-interceptors).
 
 ## Useful tkn Commands
 

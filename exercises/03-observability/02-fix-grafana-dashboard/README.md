@@ -14,6 +14,7 @@ Hints:
 - Check the datasource configuration in the dashboard JSON
 - The Prometheus datasource in this cluster is named `prometheus`
 - Dashboard ConfigMaps need the correct label to be discovered by Grafana
+- Verify that the metrics used in the dashboard panels exist in Prometheus
 
 ## Allowed Documentation
 

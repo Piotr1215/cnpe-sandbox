@@ -35,6 +35,13 @@ spec:
     image: nginx:alpine
     ports:
     - containerPort: 80
+    resources:
+      requests:
+        cpu: "25m"
+        memory: "32Mi"
+      limits:
+        cpu: "50m"
+        memory: "64Mi"
 ---
 # Backend pod in tenant-alpha
 apiVersion: v1
@@ -52,6 +59,13 @@ spec:
     ports:
     - containerPort: 8080
     - containerPort: 9090
+    resources:
+      requests:
+        cpu: "25m"
+        memory: "32Mi"
+      limits:
+        cpu: "50m"
+        memory: "64Mi"
 ---
 # Pod in tenant-beta (should be isolated)
 apiVersion: v1

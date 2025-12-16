@@ -1,9 +1,14 @@
-# Phase 3: PipelineRun exists (created by trigger)
-apiVersion: tekton.dev/v1
-kind: PipelineRun
-metadata:
-  namespace: cnpe-tekton-test
-  # generateName creates random suffix, so we just check namespace
-spec:
-  pipelineRef:
-    name: build-app
+# Phase 3: Verify TriggerTemplate and TriggerBinding work together
+apiVersion: kuttl.dev/v1beta1
+kind: TestAssert
+commands:
+  - script: |
+      # Verify TriggerTemplate would create correct PipelineRun
+      kubectl get triggertemplate build-trigger-template -n cnpe-tekton-test -o yaml | \
+        grep -q 'name: build-app'
+
+      # Verify TriggerBinding extracts correct parameter
+      kubectl get triggerbinding build-trigger-binding -n cnpe-tekton-test -o yaml | \
+        grep -q 'name: repo-url' && \
+      kubectl get triggerbinding build-trigger-binding -n cnpe-tekton-test -o yaml | \
+        grep -q 'repository.clone_url'

@@ -21,6 +21,7 @@ Fix the operator in `cnpe-operator-test` namespace:
 - Operators need RBAC permissions to watch/list/update resources
 - Check ServiceAccount, Role, and RoleBinding
 - Look for "forbidden" errors in operator logs
+- Check the operator's deployment configuration for any namespace-related settings
 
 ## Verification
 

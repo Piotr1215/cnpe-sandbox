@@ -42,7 +42,7 @@ data:
           "targets": [
             {
               "datasource": {"type": "prometheus", "uid": "wrong-datasource-uid"},
-              "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=\"cnpe-apps\"}[5m])) by (pod)",
+              "expr": "sum(rate(non_existent_metric{namespace=\"cnpe-apps\"}[5m])) by (pod)",
               "refId": "A"
             }
           ],

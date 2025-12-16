@@ -32,25 +32,26 @@ declare -A DOMAIN_DESC=(
 )
 
 usage() {
-    cat <<EOF
-Usage: $0 <exercise-path> [options]
+    cat <<'USAGE_EOF'
+Usage: run-exercise.sh <exercise-path> [options]
 
 Examples:
-  $0 01-gitops-cd/01-fix-broken-sync
-  $0 01-gitops-cd/02-canary-deployment --timeout 300
+  run-exercise.sh 01-gitops-cd/01-fix-broken-sync
+  run-exercise.sh 01-gitops-cd/02-canary-deployment --timeout 300
 
 Options:
   --setup-only   Create broken state only (practice mode, no cleanup)
   --check-only   Run assertions only (verify your fix)
   --timeout N    Override timeout in seconds (default: 420)
   --no-cleanup   Skip cleanup after exercise (for debugging)
+  --verbose      Show full KUTTL output (for debugging)
 
 Workflow:
   1. Setup creates broken state
   2. You fix the problem using kubectl/CLI
   3. KUTTL validates your fix
   4. Cleanup removes all exercise resources
-EOF
+USAGE_EOF
     exit 1
 }
 
@@ -60,6 +61,7 @@ EXERCISE_PATH="$1"
 SETUP_ONLY=false
 CHECK_ONLY=false
 NO_CLEANUP=false
+VERBOSE=false
 TIMEOUT=""
 
 shift
@@ -68,6 +70,7 @@ while [[ $# -gt 0 ]]; do
         --setup-only) SETUP_ONLY=true; shift ;;
         --check-only) CHECK_ONLY=true; shift ;;
         --no-cleanup) NO_CLEANUP=true; shift ;;
+        --verbose) VERBOSE=true; shift ;;
         --timeout) TIMEOUT="$2"; shift 2 ;;
         *) usage ;;
     esac
@@ -92,14 +95,13 @@ fi
 EXERCISE_NS=""
 SETUP_FILE="${EXERCISE_DIR}/setup.yaml"
 if [[ -f "$SETUP_FILE" ]]; then
-    # Find namespace resource or first namespace reference
-    EXERCISE_NS=$(grep -E "^  name: cnpe-" "$SETUP_FILE" 2>/dev/null | head -1 | awk '{print $2}' || true)
+    EXERCISE_NS=$(yq -r 'select(.kind == "Namespace") | .metadata.name' "$SETUP_FILE" 2>/dev/null || true)
     if [[ -z "$EXERCISE_NS" ]]; then
         EXERCISE_NS=$(grep -E "namespace: cnpe-" "$SETUP_FILE" 2>/dev/null | head -1 | awk '{print $2}' || true)
     fi
 fi
 
-# Cleanup function - removes exercise namespace and resources
+# Cleanup function
 cleanup_exercise() {
     if [[ "$NO_CLEANUP" == "true" ]]; then
         echo -e "${YELLOW}Skipping cleanup (--no-cleanup)${NC}"
@@ -111,26 +113,21 @@ cleanup_exercise() {
         kubectl delete namespace "$EXERCISE_NS" --wait=false 2>/dev/null || true
     fi
 
-    # Also cleanup any ArgoCD apps created by exercise
     if [[ -f "$SETUP_FILE" ]]; then
         kubectl delete -f "$SETUP_FILE" 2>/dev/null || true
     fi
 }
 
-# Master cleanup - timer + resources
+# Master cleanup
 cleanup_all() {
     local exit_code=$?
 
-    # Kill timer if running
     [[ -n "${TIMER_PID:-}" ]] && kill $TIMER_PID 2>/dev/null || true
 
-    # Clear timer display
-    printf "\e[s\e[1;$((${COLUMNS:-80} - 22))H%22s\e[u" " " 2>/dev/null || true
+    printf "\r%80s\r" " "
 
-    # Remove temp files
     rm -f "${KUTTL_STATUS:-}" 2>/dev/null || true
 
-    # Cleanup exercise resources
     if [[ "${CLEANUP_ON_EXIT:-false}" == "true" ]]; then
         echo ""
         cleanup_exercise
@@ -139,7 +136,7 @@ cleanup_all() {
     exit $exit_code
 }
 
-# Get timeout from config or use default
+# Get timeout
 if [[ -z "$TIMEOUT" ]]; then
     TIMEOUT=$(grep -E "^timeout:" "${DOMAIN_DIR}/kuttl-test.yaml" 2>/dev/null | awk '{print $2}')
     TIMEOUT=${TIMEOUT:-420}
@@ -154,7 +151,6 @@ printf "${BLUE}║${NC} ${CYAN}%-61s${NC} ${BLUE}║${NC}\n" "Time Limit: $((TIM
 echo -e "${BLUE}╚═══════════════════════════════════════════════════════════════╝${NC}"
 echo ""
 
-# Show task description
 if [[ -f "${EXERCISE_DIR}/README.md" ]]; then
     cat "${EXERCISE_DIR}/README.md"
     echo ""
@@ -215,76 +211,151 @@ echo ""
 echo -e "${YELLOW}Press Enter to start timer...${NC}"
 read -r
 
-# Enable cleanup on exit (after user confirms start)
 CLEANUP_ON_EXIT=true
 trap cleanup_all EXIT INT TERM
 
-# Create broken state
 echo -e "${YELLOW}Creating broken state...${NC}"
+
+# Apply setup - retry once if CRDs need time to establish
 if ! kubectl apply -f "$SETUP_FILE" 2>&1; then
-    echo -e "${RED}Setup failed!${NC}"
-    exit 1
+    echo -e "${YELLOW}Waiting for CRDs to establish...${NC}"
+    
+    # Wait for any CRDs in the setup file to be established
+    crds=$(grep -E "^kind: CustomResourceDefinition" -A5 "$SETUP_FILE" 2>/dev/null | grep "name:" | awk '{print $2}' || true)
+    for crd in $crds; do
+        kubectl wait --for=condition=Established "crd/${crd}" --timeout=30s 2>/dev/null || true
+    done
+    
+    sleep 2
+    
+    # Retry apply
+    if ! kubectl apply -f "$SETUP_FILE" 2>&1; then
+        echo -e "${RED}Setup failed!${NC}"
+        exit 1
+    fi
 fi
+
 echo -e "${GREEN}Setup complete. Fix the problem now!${NC}"
 echo ""
+
+# Load step descriptions
+declare -A STEP_DESC
+if [[ -f "${EXERCISE_DIR}/steps.txt" ]]; then
+    while IFS=: read -r num desc; do
+        STEP_DESC[$num]="$desc"
+    done < "${EXERCISE_DIR}/steps.txt"
+fi
+
+# Count total steps
+TOTAL_STEPS=$(find "$EXERCISE_DIR" -maxdepth 1 -name "*-assert.yaml" 2>/dev/null | wc -l | tr -d ' ')
+CURRENT_STEP=0
+
+KUTTL_STATUS=$(mktemp)
+KUTTL_CMD="kubectl-kuttl test ${DOMAIN_DIR} --config ${DOMAIN_DIR}/kuttl-test.yaml --test ${EXERCISE} --timeout ${TIMEOUT}"
+
+echo -e "${CYAN}Checking assertions...${NC}"
+echo ""
+
+START_TIME=$(date +%s)
 
 # Timer function
 show_timer() {
     local start=$1
     local timeout=$2
+    local step_info="$3"
     while true; do
         local elapsed=$(($(date +%s) - start))
         local remaining=$((timeout - elapsed))
         [[ $remaining -lt 0 ]] && remaining=0
 
-        # Color based on time remaining
-        local color=$GREEN
-        [[ $remaining -lt 120 ]] && color=$YELLOW
-        [[ $remaining -lt 60 ]] && color=$RED
+        local color="$GREEN"
+        [[ $remaining -lt 120 ]] && color="$YELLOW"
+        [[ $remaining -lt 60 ]] && color="$RED"
 
-        local timer_text=$(printf "%02d:%02d" $((remaining / 60)) $((remaining % 60)))
-        printf "\e[s\e[1;$((${COLUMNS:-80} - 15))H${color}[${timer_text}]${NC}\e[u"
+        local timer_text
+        timer_text=$(printf "%02d:%02d" $((remaining / 60)) $((remaining % 60)))
+        printf "\r${YELLOW}⏳ %s${NC} ${color}[${timer_text}]${NC}  " "$step_info"
         sleep 1
     done
 }
 
 # Start timer
-START_TIME=$(date +%s)
-show_timer $START_TIME $TIMEOUT &
+show_timer "$START_TIME" "$TIMEOUT" "Step 1/${TOTAL_STEPS}: Waiting for fix..." &
 TIMER_PID=$!
 
-# Run KUTTL with output filtering to show what was checked
-KUTTL_STATUS=$(mktemp)
-KUTTL_CMD="kubectl-kuttl test ${DOMAIN_DIR} --config ${DOMAIN_DIR}/kuttl-test.yaml --test ${EXERCISE} --timeout ${TIMEOUT}"
-
-echo -e "${CYAN}KUTTL checking assertions (will pass when you fix the issue)...${NC}"
-echo ""
-
-# Run KUTTL and filter output to inject assert summaries
+# Process KUTTL output
 $KUTTL_CMD 2>&1 | while IFS= read -r line; do
-    echo "$line"
-    # When a test step completes, show description and what was checked
+    # Verbose mode
+    if [[ "$VERBOSE" == "true" ]]; then
+        printf "\r%80s\r"
+        echo "$line"
+        continue
+    fi
+
+    # Skip noise
+    if [[ "$line" =~ "running command:" ]] || [[ "$line" =~ ^[[:space:]]*\]$ ]]; then
+        continue
+    fi
+    
+    # Step completed
     if [[ "$line" =~ "test step completed" ]]; then
-        # Extract step number from the line (e.g., "0-" from "test step completed 0-")
         step_num=$(echo "$line" | sed -n 's/.*test step completed \([0-9]*\).*/\1/p')
-        if [[ -n "$step_num" ]]; then
-            # Print step description from steps.txt if available
-            steps_file="${EXERCISE_DIR}/steps.txt"
-            if [[ -f "$steps_file" ]]; then
-                step_desc=$(grep "^${step_num}:" "$steps_file" 2>/dev/null | cut -d: -f2-)
-                if [[ -n "$step_desc" ]]; then
-                    echo -e "${GREEN}    ✓ Step $((step_num + 1)): ${step_desc}${NC}"
-                fi
-            fi
-            # Find and parse the assert file
-            assert_file=$(find "$EXERCISE_DIR" -maxdepth 1 -name "0${step_num}-assert.yaml" -o -name "${step_num}-assert.yaml" 2>/dev/null | head -1)
-            if [[ -f "$assert_file" ]]; then
-                "${SCRIPT_DIR}/parse-assert.sh" "$assert_file"
-            fi
+        
+        # Kill old timer, clear line
+        kill "$TIMER_PID" 2>/dev/null || true
+        printf "\r%80s\r"
+        
+        step_desc="${STEP_DESC[$step_num]:-}"
+        if [[ -n "$step_desc" ]]; then
+            echo -e "${GREEN}✓ Step $((step_num + 1))/${TOTAL_STEPS}:${step_desc}${NC}"
+        else
+            echo -e "${GREEN}✓ Step $((step_num + 1))/${TOTAL_STEPS} passed${NC}"
         fi
+        
+        # Parse assert file
+        assert_file=""
+        for f in "${EXERCISE_DIR}/0${step_num}-assert.yaml" "${EXERCISE_DIR}/${step_num}-assert.yaml"; do
+            if [[ -f "$f" ]]; then
+                assert_file="$f"
+                break
+            fi
+        done
+        if [[ -n "$assert_file" ]]; then
+            "${SCRIPT_DIR}/parse-assert.sh" "$assert_file"
+        fi
+        
+        CURRENT_STEP=$((step_num + 1))
+        
+        # Start new timer for next step
+        if [[ $CURRENT_STEP -lt $TOTAL_STEPS ]]; then
+            show_timer "$START_TIME" "$TIMEOUT" "Step $((CURRENT_STEP + 1))/${TOTAL_STEPS}: Waiting for fix..." &
+            TIMER_PID=$!
+        fi
+        continue
+    fi
+    
+    # Step failed
+    if [[ "$line" =~ "test step failed" ]]; then
+        kill "$TIMER_PID" 2>/dev/null || true
+        printf "\r%80s\r"
+        echo -e "${RED}✗ Step $((CURRENT_STEP + 1))/${TOTAL_STEPS} timed out${NC}"
+        continue
+    fi
+    
+    # Final results
+    if [[ "$line" =~ ^---\ (PASS|FAIL) ]]; then
+        kill "$TIMER_PID" 2>/dev/null || true
+        printf "\r%80s\r"
+        echo "$line"
+        continue
     fi
 done
 PIPE_STATUS=${PIPESTATUS[0]}
+
+# Cleanup timer
+kill "$TIMER_PID" 2>/dev/null || true
+TIMER_PID=""
+printf "\r%80s\r" " "
 
 if [[ $PIPE_STATUS -eq 0 ]]; then
     echo 0 > "$KUTTL_STATUS"
@@ -292,15 +363,9 @@ else
     echo 1 > "$KUTTL_STATUS"
 fi
 
-# Stop timer
-kill $TIMER_PID 2>/dev/null || true
-TIMER_PID=""
-
-# Calculate elapsed time
 END_TIME=$(date +%s)
 ELAPSED=$((END_TIME - START_TIME))
 
-# Show result
 KUTTL_EXIT=$(cat "$KUTTL_STATUS" 2>/dev/null || echo "1")
 
 echo ""
@@ -316,7 +381,7 @@ if [[ "$KUTTL_EXIT" == "0" ]]; then
 else
     echo -e "${RED}╔═══════════════════════════════════════════════════════════════╗${NC}"
     printf "${RED}║  ✗ FAILED after %d:%02d                                         ║${NC}\n" $((ELAPSED / 60)) $((ELAPSED % 60))
-    echo -e "${RED}║  Review the assertion diff above                              ║${NC}"
+    echo -e "${RED}║  Review the errors above                                      ║${NC}"
     echo -e "${RED}╚═══════════════════════════════════════════════════════════════╝${NC}"
     exit 1
 fi
