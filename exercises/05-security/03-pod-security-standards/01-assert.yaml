@@ -2,4 +2,5 @@
 apiVersion: kuttl.dev/v1beta1
 kind: TestAssert
 commands:
-  - script: kubectl get deploy api-server -n production -o yaml | grep -q 'runAsNonRoot: true'
+  - script: |
+      kubectl get deploy api-server -n production -o yaml | grep -q 'runAsNonRoot: true'

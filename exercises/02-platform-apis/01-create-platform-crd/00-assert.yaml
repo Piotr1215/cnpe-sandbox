@@ -1,7 +1,7 @@
 # Step 1: Verify CRD has required fields in schema
 apiVersion: kuttl.dev/v1beta1
 kind: TestAssert
-timeout: 60
+#timeout: 60
 commands:
 - script: |
     kubectl get crd environments.platform.cnpe.io -o yaml | grep -A5 'required:' | grep -q 'team'

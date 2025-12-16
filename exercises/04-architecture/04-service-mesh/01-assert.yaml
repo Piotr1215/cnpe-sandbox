@@ -2,4 +2,5 @@
 apiVersion: kuttl.dev/v1beta1
 kind: TestAssert
 commands:
-  - script: kubectl get virtualservice payment-routing -n cnpe-mesh-test -o yaml | grep -q 'weight: 90'
+  - script: |
+      kubectl get virtualservice payment-routing -n cnpe-mesh-test -o yaml | grep -q 'weight: 90'
