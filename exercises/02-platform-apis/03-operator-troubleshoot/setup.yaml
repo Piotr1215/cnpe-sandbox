@@ -88,6 +88,9 @@ spec:
         - name: operator
           image: bitnami/kubectl:latest
           command: ["sleep", "infinity"]
+          env:
+            - name: WATCH_NAMESPACE
+              value: "wrong-namespace"
 ---
 # Test CR that should be reconciled
 apiVersion: platform.cnpe.io/v1

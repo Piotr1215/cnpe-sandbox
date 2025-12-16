@@ -1,0 +1,93 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: echo
+spec:
+  replicas: 5
+  strategy:
+    canary:
+      canaryService: echo-canary
+      stableService: echo-stable
+      trafficRouting:
+        istio:
+          virtualService:
+            name: echo
+            routes:
+            - primary
+      steps:
+      - setWeight: 10
+      - pause: {}
+  selector:
+    matchLabels:
+      app: echo
+  template:
+    metadata:
+      labels:
+        app: echo
+    spec:
+      containers:
+      - name: echo
+        image: hashicorp/http-echo
+        args:
+        - "-text=hello"
+        ports:
+        - containerPort: 5678
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: echo-stable
+spec:
+  ports:
+  - port: 80
+    targetPort: 5678
+    protocol: TCP
+    name: http
+  selector:
+    app: echo
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: echo-canary
+spec:
+  ports:
+  - port: 80
+    targetPort: 5678
+    protocol: TCP
+    name: http
+  selector:
+    app: echo
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: echo
+spec:
+  gateways:
+  - echo-gateway
+  hosts:
+  - "*"
+  http:
+  - name: primary
+    route:
+    - destination:
+        host: echo-stable
+      weight: 90
+    - destination:
+        host: echo-canary
+      weight: 10
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: echo
+spec:
+  host: echo
+  subsets:
+  - name: stable
+    labels:
+      app: echo
+  - name: canary
+    labels:
+      app: echo-canary

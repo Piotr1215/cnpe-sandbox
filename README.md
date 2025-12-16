@@ -43,7 +43,7 @@ The setup script installs these exam-relevant tools:
 | GitOps | ArgoCD |
 | Progressive Delivery | Argo Rollouts |
 | CI/CD | Tekton |
-| Policy | Kyverno |
+| Policy | Kyverno, Gatekeeper |
 | Observability | Prometheus, Grafana |
 | Tracing | Jaeger |
 | Service Mesh | Istio (ambient mode) |
@@ -52,7 +52,41 @@ The setup script installs these exam-relevant tools:
 
 ## Exercises
 
-22 exercises across 5 domains. See [SOLUTIONS.md](SOLUTIONS.md) for concepts and answers.
+24 exercises across 5 domains. See [SOLUTIONS.md](SOLUTIONS.md) for concepts and answers.
+
+### 01: GitOps and Continuous Delivery
+- **01-fix-broken-sync**: Diagnose and fix an Argo CD application that is out of sync.
+- **02-canary-deployment**: Migrate a Kubernetes Deployment to an Argo Rollout for canary releases.
+- **03-tekton-trigger**: Troubleshoot a Tekton Trigger that is failing to create PipelineRuns.
+- **04-environment-promotion**: Use an Argo CD ApplicationSet to manage an application across multiple environments.
+- **05-bluegreen-deployment**: Perform a blue-green deployment using Argo Rollouts.
+- **06-istio-canary-release**: Troubleshoot a canary release that is failing due to an Istio misconfiguration.
+
+### 02: Platform APIs and Self-Service
+- **01-create-platform-crd**: Create a CustomResourceDefinition to enable self-service environment provisioning.
+- **02-crd-status-subresource**: Add a status subresource to a CustomResourceDefinition.
+- **03-operator-troubleshoot**: Troubleshoot a Kubernetes operator that is not reconciling.
+- **04-self-service-workflow**: Create a self-service workflow using Crossplane.
+
+### 03: Observability and Operations
+- **01-opencost-allocation**: Configure OpenCost for cost allocation.
+- **02-fix-grafana-dashboard**: Troubleshoot a broken Grafana dashboard.
+- **03-prometheus-alerting**: Create a Prometheus alerting rule.
+- **04-jaeger-tracing**: Trace a request through a microservices application using Jaeger.
+- **05-incident-diagnosis**: Diagnose and fix a failing application using observability tools.
+
+### 04: Platform Architecture
+- **01-network-policy**: Configure NetworkPolicies for a multi-tenant environment.
+- **02-resource-quota**: Configure ResourceQuotas and LimitRanges for a multi-tenant environment.
+- **03-storage-class**: Configure a StorageClass for stateful workloads.
+- **04-service-mesh**: Configure Istio for traffic splitting.
+
+### 05: Security and Policy Enforcement
+- **01-fix-broken-policy**: Troubleshoot a broken Kyverno policy.
+- **02-rbac-troubleshoot**: Troubleshoot an RBAC issue.
+- **03-pod-security-standards**: Enforce Pod Security Standards.
+- **04-istio-mtls**: Configure strict mTLS with Istio.
+- **05-gatekeeper-constraint**: Create a Gatekeeper Constraint to enforce a policy.
 
 ```bash
 just domain-gitops        # or: just gitops-fix, just gitops-canary, ...

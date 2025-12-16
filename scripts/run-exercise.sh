@@ -95,7 +95,7 @@ fi
 EXERCISE_NS=""
 SETUP_FILE="${EXERCISE_DIR}/setup.yaml"
 if [[ -f "$SETUP_FILE" ]]; then
-    EXERCISE_NS=$(grep -E "^  name: cnpe-" "$SETUP_FILE" 2>/dev/null | head -1 | awk '{print $2}' || true)
+    EXERCISE_NS=$(yq -r 'select(.kind == "Namespace") | .metadata.name' "$SETUP_FILE" 2>/dev/null || true)
     if [[ -z "$EXERCISE_NS" ]]; then
         EXERCISE_NS=$(grep -E "namespace: cnpe-" "$SETUP_FILE" 2>/dev/null | head -1 | awk '{print $2}' || true)
     fi

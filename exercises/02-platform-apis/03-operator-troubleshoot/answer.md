@@ -45,3 +45,16 @@ Operators commonly fail due to:
 - **Missing RBAC**: Can't watch/list resources
 - **Wrong apiGroup**: CRDs use custom groups
 - **Scope mismatch**: ClusterRole vs Role
+- **Incorrect WATCH_NAMESPACE**: Operator is watching the wrong namespace for resources.
+
+## The Second Problem
+
+The operator's deployment is configured with a `WATCH_NAMESPACE` environment variable that is set to `wrong-namespace`. This causes the operator to watch for `DatabaseBackup` resources in the `wrong-namespace` instead of the `cnpe-operator-test` namespace.
+
+## The Solution
+
+To fix this, you need to remove the `WATCH_NAMESPACE` environment variable from the operator's deployment, or set it to the correct namespace.
+```bash
+kubectl edit deployment backup-operator -n cnpe-operator-test
+# Remove the WATCH_NAMESPACE environment variable, or set its value to "cnpe-operator-test"
+```

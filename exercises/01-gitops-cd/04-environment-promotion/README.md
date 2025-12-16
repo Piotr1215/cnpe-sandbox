@@ -11,16 +11,16 @@ The platform team needs to deploy the `demo-app` application across three enviro
 
 Create an ApplicationSet named `demo-app-set` in the `argocd` namespace that:
 
-1. Uses a **List generator** with three elements for dev, staging, and prod
+1. Uses a **Git generator** that discovers directories in a Git repository
 2. Generates Applications named `demo-app-dev`, `demo-app-staging`, `demo-app-prod`
 3. Deploys to namespaces `demo-dev`, `demo-staging`, `demo-prod` respectively
-4. Uses the guestbook app from `https://github.com/argoproj/argocd-example-apps.git` (path: `guestbook`)
+4. The Git repository should have a directory for each environment, and each directory should contain a `config.json` file with the environment name and namespace.
 5. Enables automated sync with pruning and self-heal
 
 ## Requirements
 
-- Generator must use `elements` array with `env` and `namespace` parameters
-- Template must use parameter substitution for name and destination
+- Generator must use the Git generator to discover directories
+- The ApplicationSet should use the `config.json` file in each directory to parameterize the generated Applications.
 - All three Applications must be created and syncing
 
 ## Verification
@@ -33,4 +33,4 @@ The exercise validates:
 ## Allowed Documentation
 
 - [ArgoCD ApplicationSet](https://argo-cd.readthedocs.io/en/stable/operator-manual/applicationset/)
-- [List Generator](https://argo-cd.readthedocs.io/en/stable/operator-manual/applicationset/Generators-List/)
+- [Git Generator](https://argo-cd.readthedocs.io/en/stable/operator-manual/applicationset/Generators-Git/)

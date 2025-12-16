@@ -11,17 +11,14 @@ metadata:
   namespace: argocd
 spec:
   generators:
-    - list:
-        elements:
-          - env: dev
-            namespace: demo-dev
-          - env: staging
-            namespace: demo-staging
-          - env: prod
-            namespace: demo-prod
+    - git:
+        repoURL: file:///workspace/appset-repo
+        revision: HEAD
+        directories:
+          - path: "*"
   template:
     metadata:
-      name: 'demo-app-{{env}}'
+      name: 'demo-app-{{path.basename}}'
     spec:
       project: default
       source:
@@ -30,7 +27,7 @@ spec:
         path: guestbook
       destination:
         server: https://kubernetes.default.svc
-        namespace: '{{namespace}}'
+        namespace: '{{path.basename}}-test'
       syncPolicy:
         automated:
           prune: true

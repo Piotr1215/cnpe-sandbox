@@ -10,6 +10,8 @@ A developer reports the `cnpe-broken-app` Application in namespace `argocd` is s
 
 Diagnose and fix the Application so it reaches **Synced** and **Healthy** status.
 
+**Note:** There may be more than one issue with the Application manifest.
+
 ## Allowed Documentation
 
 - [ArgoCD Application Specification](https://argo-cd.readthedocs.io/en/stable/user-guide/application-specification/)
